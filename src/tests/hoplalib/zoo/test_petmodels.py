@@ -489,7 +489,7 @@ class TestZooHelper:
         helper = ZooHelper(zoo)
         filtered_zoo: Zoo = helper.get_feedable_zoo()
 
-        assert len(filtered_zoo) is 2
+        assert len(filtered_zoo) == 2
         assert "Ferret-Red" in filtered_zoo
         assert "Parrot-Base" in filtered_zoo
 
@@ -503,6 +503,20 @@ class TestZooHelper:
         filtered_zoo: Zoo = helper.filter_on_pet_name(lambda name: name.endswith("-Base"))
 
         assert list(filtered_zoo.keys()) == ["Phoenix-Base", "Parrot-Base"]
+
+    def test_filter_on_pet(self):
+        pets: dict = {"BearCub-Desert": 9, "Owl-Golden": -1, "Ferret-Red": 27, "Phoenix-Base": 5,
+                      "Parrot-Base": 10}
+        user: HabiticaUser = _create_user(pets=pets)
+        zoo: Zoo = ZooBuilder(user).build()
+
+        def predicate(pet: Pet) -> bool:
+            return int(pet.feeding_status) < 9
+
+        helper = ZooHelper(zoo)
+        filtered_zoo: Zoo = helper.filter_on_pet(predicate=predicate)
+
+        assert list(filtered_zoo.keys()) == ["Owl-Golden", "Phoenix-Base"]
 
 
 def _create_user(*, pets: Optional[dict] = None, mounts: Optional[dict] = None) -> HabiticaUser:
